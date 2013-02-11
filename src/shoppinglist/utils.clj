@@ -2,8 +2,10 @@
   (:use [clojure.tools.logging :only (info)]
         [slingshot.slingshot :only [try+]])
   (:require
-    [shoppinglist.model :as model]
-    [cheshire.core :as json]))
+    [cheshire.core :as json])
+  (:import
+    [java.util UUID]
+    [org.mindrot.jbcrypt BCrypt]))
 
 (defn response [body & {:keys [status content-type headers]
                         :or {status 200 content-type "application/json;charset=UTF-8" headers {}}}]
@@ -27,27 +29,24 @@
 (defn forbidden [req]
   (response "Forbidden" :status 403))
 
-;; Controllers helper functions
 
-(defn build-shopping-list [data]
-  (if (not (vector? data))
-    (do
-      (info "Can't build shopping list: not a list: " data)
-      nil)
-    (doall
-      (for [{item "item" qty "quantity" unit "unit" pri "priority"} data]
-        (model/new-shoppinglist-item item qty unit pri)))))
+(defn hash-password
+  "Hashes a given plaintext password using bcrypt and an optional
+   :work-factor (defaults to 10)"
+  [password & {:keys [work-factor]}]
+  (BCrypt/hashpw password (if work-factor
+                            (BCrypt/gensalt work-factor)
+                            (BCrypt/gensalt))))
 
-(defn parse-shopping-list [data]
-  (try+
-    (let [parsed (json/parse-string data)]
-      (build-shopping-list parsed))
-    (catch [:type :shoppinglist.model/invalid-item] {msg :message value :value}
-      (do
-        (info "Can't decode json: " msg value)
-        nil))
-    (catch Object msg
-      (do
-        (info "Can't decode json: " msg)
-        nil))))
+(defn check-password
+  "Returns true if the plaintext [password] corresponds to [hash]"
+  [password hash]
+  (BCrypt/checkpw password hash))
 
+(defn generate-uuid
+  "Returns a random UUID"
+  []
+  (UUID/randomUUID))
+
+(defn to-uuid [uuid]
+  (UUID/fromString uuid))

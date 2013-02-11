@@ -22,7 +22,7 @@
         ctype (headers "content-type")]
     (if (nil? (re-find #"^application/json" ctype))
       (utils/bad-request (str "bad content type:" ctype))
-      (let [sl (utils/parse-shopping-list (slurp body))]
+      (let [sl (model/parse-shopping-list (slurp body))]
         (if (nil? sl)
           (utils/bad-request (str "invalid request body"))
           (do
@@ -33,3 +33,20 @@
                   (info "Can't save the object: " e)
                   (utils/response "can't save the object" :status 500))))))))))
 
+(defn register [req]
+  (let [{body :body ip :remote-addr} req
+        data (json/parse-string (slurp body))
+        email (get data "email")
+        real-name (get data "real_name")
+        password (get data "password")
+        res (first (model/create-user email real-name password ip))]
+    (println (:request_id res))
+    (utils/response
+      (str "Check your email, " (:real_name res)))))
+
+(defn accept [req]
+  (let [{{id :id} :params} req]
+    (println req id)
+    (if (model/check-registration-request id)
+      (model/accept-user id)
+      (utils/response "bad request" :status 400))))

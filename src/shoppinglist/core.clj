@@ -12,6 +12,7 @@
                                   wrap-auth authenticate whoami login]])
   (:require 
     [shoppinglist.controller :as c]
+    [shoppinglist.utils :as u]
     [shoppinglist.model :as model]))
 
 (defroutes routes
@@ -24,14 +25,16 @@
        (authorized? req [[is-owner?] [has-permission? "list-edit"]] c/shopping-list-update))
 
   (POST "/login" req login)
+  (POST "/register" req c/register)
+  (GET "/register/:id" req c/accept)
   (GET "/whoami" req whoami)
            
-  (ANY "*" {uri :uri} (c/response-not-found (str "resource not found: " uri)))
+  (ANY "*" {uri :uri} (u/response-not-found (str "resource not found: " uri)))
   (route/not-found "Not Found"))
 
 (def app
   (-> routes
-    (wrap-auth authenticate #{"/login"} )
+    (wrap-auth authenticate [#"^/login$" #"^/register/?.*"] )
     (wrap-params)
     (wrap-nested-params)
     (wrap-keyword-params)

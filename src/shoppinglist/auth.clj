@@ -1,21 +1,17 @@
 (ns shoppinglist.auth
   (:require
+    [clojure.tools.logging :as log]
     [cheshire.core :as json]
     [shoppinglist.controller :as c]
     [shoppinglist.model :as model]
     [shoppinglist.utils :as utils]))
 
-(def users {"user" {:password "user_pwd"
-                    :roles ["user"]}
-            "root" {:password "root_pwd"
-                    :roles ["admin"]}})
-
 (def roles {"user" ["list-view", "list-edit", "list-delete"],
             "admin" ["list-view-all", "list-view", "list-edit", "list-delete"]})
 
 (defn get-user [username]
-  (assoc (get users username) :username username))
-
+  (model/get-user username))
+  
 (defn get-request-user [request]
   (let [session (:session request)]
     (if (or (nil? session) (empty? session))
@@ -23,6 +19,7 @@
       (get-user (:username session)))))
 
 (defn get-user-permissions [user]
+  ;TODO: filtrare ruoli errati
   (set (flatten (for [role (:roles user)] (get roles role)))))
 
 (defn has-permission? [request permission]
@@ -37,7 +34,7 @@
   (let [user-data (get-user username)]
     (if (nil? user-data)
       nil
-      (if (= password (:password user-data))
+      (if (utils/check-password password (:password user-data))
         user-data
         nil))))
 
@@ -46,6 +43,7 @@
               :let [fun (first pred)
                     args (rest pred)]]
               (apply fun (cons request args)))]
+    (log/debug "predicates " predicates "match " res)
     (if (every? identity res)
       (target request)
       (utils/forbidden request))))
@@ -69,7 +67,7 @@
   "Middleware to check for authentication/authorization"
   [handler auth-function excluded]
   (fn [request]
-    (if (contains? (set excluded) (:uri request))
+    (if (some identity (for [x excluded :when (re-matches x (:uri request))] true))
       (handler request)
       (if (check-cookie (:session request))
         (handler request)

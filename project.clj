@@ -11,7 +11,8 @@
                  [ring/ring-core "1.1.8"]
                  [ring/ring-jetty-adapter "1.1.8"]
                  [compojure "1.1.3"]
-                 [slingshot "0.10.3"]]
+                 [slingshot "0.10.3"]
+                 [org.mindrot/jbcrypt "0.3m"]]
 
   :main shoppinglist.core
 
