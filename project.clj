@@ -15,6 +15,6 @@
 
   :main shoppinglist.core
 
-  :ring {:handler shoppinglist.core/routes, :init shoppinglist.core/init}
+  :ring {:handler shoppinglist.core/app, :init shoppinglist.core/init}
 
   :plugins [[lein-ring "0.8.2"]])
