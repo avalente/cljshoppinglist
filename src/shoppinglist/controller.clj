@@ -42,14 +42,13 @@
         password (get data "password")
         res (first (model/create-user email real-name password ip))]
     ;TODO: mandare email
-    (println (:request_id res))
+    (info (str "generated uuid for request by '" email "' is: " (:request_id res)))
     (utils/response
       (str "Check your email, " (:real_name res)))))
 
 ;TODO: controllo errori
 (defn accept [req]
   (let [{{id :id} :params} req]
-    (println req id)
     (if (model/check-registration-request id)
       (model/accept-user id)
       (utils/response "bad request" :status 400))))

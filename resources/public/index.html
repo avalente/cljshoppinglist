@@ -22,10 +22,6 @@
             padding-top: 30px;
         }
 
-        .dropdown {
-            padding-top: 30px;
-        }
-
         .new-item {
             width: 550px;
         }
@@ -55,6 +51,84 @@
             padding: 7px 9px;
         }
 
+        [class^="icon-"],
+        [class*=" icon-"] {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            margin-top: 1px;
+            *margin-right: .3em;
+            line-height: 14px;
+            vertical-align: text-top;
+            background-image: url("../img/glyphicons-halflings.png");
+            background-position: 14px 14px;
+            background-repeat: no-repeat;
+        }
+
+        .list {
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            display: none;
+            float: left;
+            min-width: 160px;
+            padding: 5px 0;
+            margin: 2px 0 0;
+            list-style: none;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            *border-right-width: 2px;
+            *border-bottom-width: 2px;
+            -webkit-border-radius: 6px;
+            -moz-border-radius: 6px;
+            border-radius: 6px;
+            -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            -webkit-background-clip: padding-box;
+            -moz-background-clip: padding;
+            background-clip: padding-box;
+            display: block;
+            position: static;
+            margin-bottom: 5px;
+            width: 560px;
+        }
+
+        .list > li > a {
+            display: block;
+            padding: 3px 20px;
+            clear: both;
+            font-weight: normal;
+            line-height: 20px;
+            color: #333333;
+            white-space: nowrap;
+        }
+
+        .icon-white,
+        .list > li > a:hover > [class^="icon-"],
+        .list > li > a:focus > [class^="icon-"],
+        .list > li > a:hover > [class*=" icon-"],
+        .list > li > a:focus > [class*=" icon-"],
+        .list > .active > a > [class^="icon-"],
+        .list > .active > a > [class*=" icon-"]{
+            background-image: url("../img/glyphicons-halflings-white.png");
+        }
+
+        .list > li > a:hover,
+        .list > li > a:focus{
+            color: #ffffff;
+            text-decoration: none;
+            background-color: #0081c2;
+            background-image: -moz-linear-gradient(top, #0088cc, #0077b3);
+            background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0077b3));
+            background-image: -webkit-linear-gradient(top, #0088cc, #0077b3);
+            background-image: -o-linear-gradient(top, #0088cc, #0077b3);
+            background-image: linear-gradient(to bottom, #0088cc, #0077b3);
+            background-repeat: repeat-x;
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0);
+        }
+
     </style>
   </head>
   <body>
@@ -63,27 +137,68 @@
 
           <div id="shopping-list" class="dropdown" style="display:none">
               <div>
-                  <input type="text" data-provide="typeahead" id="new-item" class="new-item" autocomplete="off">
+                  <input type="text" data-provide="typeahead" id="new-item" class="new-item" autocomplete="off" title="Add a new item">
               </div>
 
-              <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display: block; position: static; margin-bottom: 5px; width: 560px;">
+              <ul class="list">
               </ul>
           </div>
 
-          <div id="login-form" style="display:none" class="login-form">
-              <form class="form-signin" action="/login" method="POST">
+          <div id="login-window" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                   <h2 class="form-signin-heading">Please sign in</h2>
-                  <input name="username" type="text" class="input-block-level" placeholder="Email address">
-                  <input name="password" type="password" class="input-block-level" placeholder="Password">
-                  <label class="checkbox">
-                      <input type="checkbox" value="remember-me"> Remember me
-                  </label>
-                  <button class="btn btn-large btn-primary" type="submit">Sign in</button>
-                  <input type="hidden" name="url" value="">
+              </div>
+              <div class="modal-body">
+                  <div id="login-form" class="login-form">
+                      <form class="form-signin" action="/login" method="POST">
+                          <input name="username" type="text" class="input-block-level" placeholder="Email address">
+                          <input name="password" type="password" class="input-block-level" placeholder="Password">
+                          <label class="checkbox">
+                              <input type="checkbox" value="remember-me"> Remember me
+                          </label>
+                          <button class="btn btn-large btn-primary pull-right" type="submit">Sign in</button>
+                          <input type="hidden" name="url" value="">
 
-                  <a href="#" id="register-link">Register</a>
-              </form>
+                          <a href="#" id="register-link">Register</a>
+                      </form>
+                  </div>
+              </div>
           </div>
+
+          <div id="register-window" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h2 class="form-signin-heading">Register</h2>
+              </div>
+              <div class="modal-body">
+                  <div id="register-form" class="register-form">
+                      <form class="form-signin">
+                          <input name="email" type="text" class="input-block-level" placeholder="Email address">
+                          <input name="real_name" type="text" class="input-block-level" placeholder="Real name">
+                          <input name="password" type="password" class="input-block-level" placeholder="Password">
+                          <button class="btn btn-large btn-primary pull-right" type="button" id="register-button">Register</button>
+                      </form>
+                  </div>
+              </div>
+          </div>
+
+          <div id="confirmation-window" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h2>Confirmation required</h2>
+              </div>
+              <div class="modal-body">
+                  An email has been sent to your address, please check it and follow the instructions.
+              </div>
+          </div>
+
       </div>
+
+
+      <div>
+          <a href="/logout">Logout</a>
+      </div>
+
   </body>
 </html>

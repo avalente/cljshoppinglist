@@ -62,7 +62,9 @@
    :session {}})
 
 (defn whoami [{session :session}]
-  (utils/response (:username session)))
+  (let [username (:username session)
+        user (dissoc (get-user username) :password)]
+  (utils/response user)))
 
 ;; TODO: add more authorization factors
 (defn check-cookie [session]
