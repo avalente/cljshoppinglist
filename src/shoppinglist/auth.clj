@@ -48,11 +48,18 @@
       (target request)
       (utils/forbidden request))))
 
-(defn login [ {{username "username" password "password"} :form-params} ]
+(defn login [ {{username "username" password "password" url "url"} :form-params} ]
   (let [auth (authenticate username password)]
     (if (nil? auth)
       (utils/unauthorized [])
-      {:status 200 :session (assoc auth :username username)})))
+      {:status 302
+       :headers {"Location" url}
+       :session (assoc auth :username username :created (.toString (:created auth)))})))
+
+(defn logout [req]
+  {:status 302
+   :headers {"Location" "/"}
+   :session {}})
 
 (defn whoami [{session :session}]
   (utils/response (:username session)))

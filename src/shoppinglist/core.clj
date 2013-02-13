@@ -9,7 +9,7 @@
         [ring.middleware.session :only [wrap-session]]
         [ring.middleware.session.cookie :only [cookie-store]]
         [shoppinglist.auth :only [authorized? has-permission? is-owner?
-                                  wrap-auth authenticate whoami login]])
+                                  wrap-auth authenticate whoami login logout]])
   (:require 
     [shoppinglist.controller :as c]
     [shoppinglist.utils :as u]
@@ -27,14 +27,19 @@
   (POST "/login" req login)
   (POST "/register" req c/register)
   (GET "/register/:id" req c/accept)
+  (GET "/logout" req logout)
   (GET "/whoami" req whoami)
+
+  (GET "/" req {:status 302 :headers {"Location" "/public/index.html"}})
            
+  (route/resources "/public")
+
   (ANY "*" {uri :uri} (u/response-not-found (str "resource not found: " uri)))
   (route/not-found "Not Found"))
 
 (def app
   (-> routes
-    (wrap-auth authenticate [#"^/login$" #"^/register/?.*"] )
+    (wrap-auth authenticate [#"^/login$" #"^/register/?.*" #"^/public/.*" #"^/$"] )
     (wrap-params)
     (wrap-nested-params)
     (wrap-keyword-params)

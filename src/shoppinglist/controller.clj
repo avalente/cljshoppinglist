@@ -33,6 +33,7 @@
                   (info "Can't save the object: " e)
                   (utils/response "can't save the object" :status 500))))))))))
 
+;TODO: controllo errori
 (defn register [req]
   (let [{body :body ip :remote-addr} req
         data (json/parse-string (slurp body))
@@ -40,10 +41,12 @@
         real-name (get data "real_name")
         password (get data "password")
         res (first (model/create-user email real-name password ip))]
+    ;TODO: mandare email
     (println (:request_id res))
     (utils/response
       (str "Check your email, " (:real_name res)))))
 
+;TODO: controllo errori
 (defn accept [req]
   (let [{{id :id} :params} req]
     (println req id)
