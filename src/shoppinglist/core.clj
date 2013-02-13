@@ -51,6 +51,6 @@
 (defn init []
   (model/initialize (System/getenv "DSN")))
 
-(defn -main []
+(defn -main [port]
   (init)
-  (run-jetty app {:port 8080 :join? false}))
+  (run-jetty app {:port (Integer. port) :join? false}))
