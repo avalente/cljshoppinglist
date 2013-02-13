@@ -3,10 +3,13 @@
     [clojure.java.jdbc :as sql]
     [clojure.tools.logging :as log]
     [cheshire.core :as json]
+    [clojure.string :as string]
     [shoppinglist.utils :as u])
   (:use 
     [clojure.tools.logging :only (info)]
-    [slingshot.slingshot :only [try+ throw+]]))
+    [slingshot.slingshot :only [try+ throw+]])
+  (:import
+    [org.joda.time DateTime]))
 
 (def dsn)
 
@@ -14,16 +17,42 @@
   (log/info "Initializing model on " new-dsn)
   (def dsn new-dsn))
 
-(defn new-shoppinglist-item [item & [quantity unit priority]]
-  (if (not (string? item))
-    (throw+ {:type ::invalid-item :message "bad item" :value item})
-    (if (not (or (nil? unit) (string? unit)))
-      (throw+ {:type ::invalid-item :message "bad unit" :value unit})
-      (if (not (or (nil? quantity) (number? quantity)))
-        (throw+ {:type ::invalid-item :message "bad quantity" :value quantity})
-        (if (not (or (nil? priority) (integer? priority)))
-          (throw+ {:type ::invalid-item :message "bad priority" :value priority})
-          {:item item, :quantity quantity, :unit unit, :priority priority})))))
+(defn check-quantity [value]
+  (if (or (nil? value) (number? value))
+    value
+    (throw+ {:type ::invalid-item :message "bad quantity" :value value})))
+
+(defn check-item [value]
+  (if (string? value)
+    value
+    (throw+ {:type ::invalid-item :message "bad item" :value value})))
+
+(defn check-unit [value]
+  (if (or (nil? value) (string? value))
+    value
+    (throw+ {:type ::invalid-item :message "bad unit" :value value})))
+
+(def priority-strings {"low" 1 "medium" 5 "high" 10})
+
+(defn check-priority [value]
+  (if (or (nil? value) (integer? value))
+    value
+    (let [priority (get priority-strings (string/lower-case value))]
+      (if (not (nil? priority))
+        priority
+        (throw+ {:type ::invalid-item :message "bad priority" :value value})))))
+
+(defn new-shoppinglist-item [item & [quantity unit priority inserted last-bought]]
+  {:item (check-item item),
+   :quantity (check-quantity quantity),
+   :unit (check-unit unit),
+   :priority (check-priority priority),
+   :inserted (if 
+               (or (nil? inserted) (= inserted "now"))
+               (.toString (DateTime/now))
+               inserted)
+   :last-bought (if (= last-bought "now") (.toString (DateTime/now)) last-bought)
+   })
 
 (defn new-shoppinglist [user & [data]]
   {:user user,
@@ -127,8 +156,9 @@
       (info "Can't build shopping list: not a list: " data)
       nil)
     (doall
-      (for [{item "item" qty "quantity" unit "unit" pri "priority"} data]
-        (new-shoppinglist-item item qty unit pri)))))
+      (for [{item "item" qty "quantity" unit "unit" pri "priority"
+             inserted "inserted" last-bought "last-bought"} data]
+        (new-shoppinglist-item item qty unit pri inserted last-bought)))))
 
 (defn parse-shopping-list [data]
   (try+

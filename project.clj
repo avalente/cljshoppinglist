@@ -12,10 +12,13 @@
                  [ring/ring-jetty-adapter "1.1.8"]
                  [compojure "1.1.3"]
                  [slingshot "0.10.3"]
-                 [org.mindrot/jbcrypt "0.3m"]]
+                 [org.mindrot/jbcrypt "0.3m"]
+                 [joda-time "2.1"]]
 
   :main shoppinglist.core
 
   :ring {:handler shoppinglist.core/app, :init shoppinglist.core/init}
+
+  :min-lein-version "2.0.0"
 
   :plugins [[lein-ring "0.8.2"]])

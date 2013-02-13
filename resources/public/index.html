@@ -140,9 +140,26 @@
                   <input type="text" data-provide="typeahead" id="new-item" class="new-item" autocomplete="off" title="Add a new item">
               </div>
 
-              <ul class="list">
-              </ul>
+              <div>
+                  <ul id="list-tabs" class="nav nav-pills">
+                      <li class="active"><a href="#list-tab" data-toggle="tab">List</a></li>
+                      <li><a href="#bought-tab" data-toggle="tab">Old items</a></li>
+                  </ul>
+
+                  <div id="list-tabs-content" class="tab-content">
+                      <div class="tab-pane fade in active" id="list-tab">
+                          <ul class="list" id="list">
+                          </ul>
+                      </div>
+
+                      <div class="tab-pane fade" id="bought-tab">
+                          <ul class="list" id="previous">
+                          </ul>
+                      </div>
+                  </div>
+              </div>
           </div>
+
 
           <div id="login-window" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
               <div class="modal-header">

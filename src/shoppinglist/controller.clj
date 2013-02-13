@@ -15,7 +15,7 @@
         data (model/read-shoppinglist user)]
     (if (nil? data)
       (utils/response-not-found "list not found for user: " user)
-      (utils/response data))))
+      (utils/response (assoc data :items (count (:list data)))))))
 
 (defn shopping-list-update [req]
   (let [{{user :user} :params body :body headers :headers} req
