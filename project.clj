@@ -13,7 +13,8 @@
                  [compojure "1.1.3"]
                  [slingshot "0.10.3"]
                  [org.mindrot/jbcrypt "0.3m"]
-                 [joda-time "2.1"]]
+                 [joda-time "2.1"]
+                 [speclj "2.5.0"]]
 
   :main shoppinglist.core
 
@@ -21,4 +22,7 @@
 
   :min-lein-version "2.0.0"
 
-  :plugins [[lein-ring "0.8.2"]])
+  :test-path "spec/"
+
+  :plugins [[lein-ring "0.8.2"]
+            [speclj "2.5.0"]])
