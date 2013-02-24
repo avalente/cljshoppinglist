@@ -37,15 +37,18 @@
   (ANY "*" {uri :uri} (u/response-not-found (str "resource not found: " uri)))
   (route/not-found "Not Found"))
 
+(def public-urls [#"^/login$" #"^/register/?.*" #"^/public/.*" #"^/$"])
+
 (def app
   (-> routes
-    (wrap-auth authenticate [#"^/login$" #"^/register/?.*" #"^/public/.*" #"^/$"] )
+    (wrap-auth authenticate public-urls )
     (wrap-params)
     (wrap-nested-params)
     (wrap-keyword-params)
+    ; TODO: store the key externally and generate it randomly
     (wrap-session {:store (cookie-store {:key "ABCDEFGHABCDEFGA"})
-                   :cookie-name "sid"
-                   :cookie-attrs {:max-age 3600}})
+                   :cookie-name "sls"
+                   :cookie-attrs {:max-age 86400}})
     (wrap-cookies)))
 
 (defn init []

@@ -1,6 +1,8 @@
 State = {};
 
 $(document).ready(function(){
+    initialize();
+
     $("#login-form>form>input[name=url]").val(window.location.pathname);
 
     $("#register-link").click(onRegister);
@@ -80,13 +82,14 @@ function buildUl(data){
         id = 'sl-item-'+i;
         li = buildLi(data, id, i);
 
-        if (data[i].inserted <= data[i]['last-bought']){
+        if (!isNew(data[i])){
             li.tooltip({
                 title: "Double click to put in the shopping list",
                 placement: "right",
                 delay: {hide: 300}
             });
             li.dblclick(onBoughtDblClick);
+            li.longClick(onBoughtDblClick);
 
             ul2.append(li);
         } else{
@@ -101,6 +104,10 @@ function buildUl(data){
     }
 
     $("#shopping-list").show();
+}
+
+function isNew(item){
+    return (item['last-bought'] === null) || item.inserted > item['last-bought'];
 }
 
 function buildActionMenu(idx){
@@ -142,7 +149,7 @@ function onDelete(ev){
 function onBoughtDblClick(ev){
     var idx = ev.target.getAttribute('data-idx');
 
-    State.list[idx]['inserted'] = 'now';
+    State.list[idx].inserted = 'now';
 
     save();
 }
@@ -193,16 +200,19 @@ function addItem(text){
         return;
     }
 
-    var found = false;
+    var found = -1;
     for (i=0; i<State.list.length; i++){
         if (State.list[i].item.toLowerCase() == text.toLowerCase()){
-            found = true;
+            found = i;
             break;
         }
     }
 
-    if (found){
+    if (found >= 0){
         //TODO: aggiornare quantità ecc
+        if (!isNew(State.list[found])){
+            State.list[found].inserted = 'now';
+        }
     } else{
         State.list.push(value);
     }
@@ -251,4 +261,29 @@ function doRegister(){
     }).error(function(xhr, status, error){
         alert(JSON.parse(error));
     });
+}
+
+function initialize(){
+    $.fn.longClick = function(callback, length){
+        if (length === undefined){
+            length = 500;
+        }
+
+        var md = function(){
+             this._clickTime = (new Date()).valueOf();
+        }
+
+        var mu = function(){
+            var now = (new Date()).valueOf();
+            if ((now - this._clickTime) >= length){
+                var ev = $.Event("dblclick");
+                ev.target = this.firstChild;
+                callback(ev);
+            }
+        }
+
+        this.mousedown(md);
+        this.mouseup(mu);
+        return this;
+    }
 }

@@ -48,8 +48,9 @@
       (target request)
       (utils/forbidden request))))
 
-(defn login [ {{username "username" password "password" url "url"} :form-params} ]
-  (let [auth (authenticate username password)]
+(defn login [req]
+  (let [{{username "username" password "password" url "url"} :form-params} req
+        auth (authenticate username password)]
     (if (nil? auth)
       (utils/unauthorized [])
       {:status 302
